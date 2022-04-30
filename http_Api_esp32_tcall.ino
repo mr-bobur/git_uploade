@@ -89,6 +89,7 @@ void setup() {
 
 unsigned long time4 = 0;
 unsigned long time3 = 0;
+unsigned long tester = 0;
 int  resetCount = 0;
 void loop() {
   if (time3 + 1000 < millis()) {
@@ -104,21 +105,27 @@ void loop() {
     }
   }
   if (time4 + 5000 < millis()) {
-    time4 = millis(); 
-     SerialMon.println(resetCount);
-    http.setHttpResponseTimeout(5000);
-    http.get(resource);
-    if ( http.responseStatusCode() == -3) { 
-      http.stop(); 
+    time4 = millis();
+    char tempString2[8]; 
+    Serial.println("making PUT request");
+    String contentType = "application/json";  
+    String putData = "{\"temp\":"+ String(tester++)+"}"; 
+    http.beginRequest();
+    http.put("http://185.196.214.199:8089/api/devices/1", contentType, putData);
+    http.endRequest(); 
+    SerialMon.println(resetCount);
+    http.setHttpResponseTimeout(5000); 
+    if ( http.responseStatusCode() == -3) {
+      http.stop();
       resetCount++;
       return;
     }
-    if(resetCount > 2){
-          resetCount--;    
-       }
-    body = http.responseBody(); 
+    if (resetCount > 2) {
+      resetCount--;
+    }
+    body = http.responseBody();
     SerialMon.println(body);
-    http.stop(); 
-    
+    http.stop();
+
   }
 }
